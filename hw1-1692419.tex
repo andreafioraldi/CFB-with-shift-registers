@@ -30,7 +30,7 @@ In the following sections, we will discuss the usage and the impact of CFB and, 
   \label{fig:cfb_enc}
 \end{figure}
 
-In this technique, regards the encryption, the produced cyphertext block is forwarded to the next encryption unit to produce a block of encrypted data that, xored\footnote{exclusive-ORed} with the correspondent plaintext block, generates the next ciphertext block. 
+In this technique, regards the encryption, the produced ciphertext block is forwarded to the next encryption unit to produce a block of encrypted data that, xored\footnote{exclusive-ORed} with the correspondent plaintext block, generates the next ciphertext block. 
 
 \begin{figure}[!ht]
   \centering
@@ -39,7 +39,7 @@ In this technique, regards the encryption, the produced cyphertext block is forw
   \label{fig:cfb_dec}
 \end{figure}
 
-Viceversa, during the decryption, the output of the encryption unit using the previous cyphertext block is xored with the current cyphertext block to produce the corresponding plaintext block.
+Viceversa, during the decryption, the output of the encryption unit using the previous ciphertext block is xored with the current ciphertext block to produce the corresponding plaintext block.
 
 This mode of operation requires an initialization vector (IV) as the initial input block. As you can see in figure \ref{fig:cfb_dec} the encryption unit is used also for decryption.
 
@@ -56,8 +56,8 @@ The used symbols are defined in the following way:
 \item $IV := $ the initialization vector;
 \item $\CIPH := $ the encryption process using the key $K$;
 \item $P_i := $ the i-th block of the plaintext;
-\item $C_i := $ the i-th block of the cyphertext;
-\item $n := $ number of blocks composing the plaintext/cyphertext;
+\item $C_i := $ the i-th block of the ciphertext;
+\item $n := $ number of blocks composing the plaintext/ciphertext;
 \end{itemize}
 
 An additional property is the possibility to use parallelism in the decryption process. 
@@ -72,13 +72,13 @@ Before describing the usage of the shift registers in the CFB mode we must provi
 
 \begin{itemize}
 \item $b := $ the size of a block in bits;
-\item $s := $ the size of a plaintext/cyphertext segment in bits ($1 \le s \le b$);
+\item $s := $ the size of a plaintext/ciphertext segment in bits ($1 \le s \le b$);
 \item $SR := $ the content of the input shift register;
 \item $P_i := $ the i-th segment of the plaintext;
-\item $C_i := $ the i-th segment of the cyphertext;
+\item $C_i := $ the i-th segment of the ciphertext;
 \end{itemize}
 
-We define a {\em segment} as a block of the plaintext/cyphertext on which CFB operates. It can be smaller than the type of blocks used by $\CIPH$, so we use the term segment to distinguish between them.
+We define a {\em segment} as a block of the plaintext/ciphertext on which CFB operates. It can be smaller than the type of blocks used by $\CIPH$, so we use the term segment to distinguish between them.
 
 \begin{figure}[!ht]
   \centering
@@ -87,8 +87,8 @@ We define a {\em segment} as a block of the plaintext/cyphertext on which CFB op
   \label{fig:cfb_shift}
 \end{figure}
 
-In this variant of the technique, only the $s$ most significant bits of the $E_K$ output are xored with the plaintext segment to produce a cyphertext segment. Then, to form the next input block, the $b - s$ least significant bits of the previous input block are shifted to left of $s$ positions and thus remaining space is filled with the $s$ bits of the previous cyphertext segment. The $IV$ is used as usual.
-The decryption works in a similar way, the input cyphertext are placed in the input block after shifting the $b - s$ least significant bits.
+In this variant of the technique, only the $s$ most significant bits of the $E_K$ output are xored with the plaintext segment to produce a ciphertext segment. Then, to form the next input block, the $b - s$ least significant bits of the previous input block are shifted to left of $s$ positions and thus remaining space is filled with the $s$ bits of the previous ciphertext segment. The $IV$ is used as usual.
+The decryption works in a similar way, the input ciphertext segment is placed in the input block after shifting the $b - s$ least significant bits.
 
 The mathematical formulas to CFB with shift registers are the following:
 
@@ -103,9 +103,16 @@ $S_0 = IV$, $S_i = ((S_{i-1} << s) + C_i)$ $mod$ $2^n$ $\forall i = 1...n$.
 
 \subsection{Impact}
 
+The usage of shift registers in CFB mode provides a big change over the traditional technique: it makes CFB self-synchronizing. A cipher is called self-synchronizing when, if a part of the ciphertext is lost, the decryption can continue correctly after a finite number of incorrect decryptions of blocks.
+In the standard CFB if a bit of the ciphertext is lost the technique is not able to synchronize.
+With the shift registers, instead, if we lost $x$ bits of a ciphertext segment $C_j$, the decryption will produce wrong plaintext segments until that there are some bits of $C_j$ in $SR$. The number of the corrupted plaintext segments is $n/s$.
 
+\section{Conslusion}
 
-\newpage
+Introducing shift registers in the CFB mode is a game-changing choice with a low impact on performance. In fact, the implementations in software and in hardware are not more complicated than the standard technique and with a reasonable overhead of $b/s * n$ calls to $E_K$ versus the $n$ calls performed in the traditional CFB. 
+
+\vfill
+
 \begin{thebibliography}{99}
 
 \bibitem{wiki}
