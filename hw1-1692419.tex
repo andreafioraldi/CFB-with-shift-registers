@@ -62,6 +62,8 @@ The used symbols are defined in the following way:
 
 An additional property is the possibility to use parallelism in the decryption process. 
 
+CFB is an example of stream cipher, in fact the encryption is done one block at time and depends from the state. 
+
 \section{CFB with Shift Registers}
 
 One of the most used variants of CFB introduces shift registers as input for the encryption unit.
@@ -90,7 +92,7 @@ We define a {\em segment} as a block of the plaintext/ciphertext on which CFB op
 In this variant of the technique, only the $s$ most significant bits of the $E_K$ output are xored with the plaintext segment to produce a ciphertext segment. Then, to form the next input block, the $b - s$ least significant bits of the previous input block are shifted to left of $s$ positions and thus remaining space is filled with the $s$ bits of the previous ciphertext segment. The $IV$ is used as usual.
 The decryption works in a similar way, the input ciphertext segment is placed in the input block after shifting the $b - s$ least significant bits.
 
-The mathematical formulas to CFB with shift registers are the following:
+The mathematical formulas for CFB with shift registers are the following:
 
 \begin{itemize}
 \item Encryption: $C_i = extract(E_K(SR_{i-1}), s) \oplus P_i$ $\forall i = 1...n$;
@@ -103,7 +105,7 @@ $S_0 = IV$, $S_i = ((S_{i-1} << s) + C_i)$ $mod$ $2^n$ $\forall i = 1...n$.
 
 \subsection{Impact}
 
-The usage of shift registers in CFB mode provides a big change over the traditional technique: it makes CFB self-synchronizing. A cipher is called self-synchronizing when, if a part of the ciphertext is lost, the decryption can continue correctly after a finite number of incorrect decryptions of blocks.
+The usage of shift registers in CFB mode provides a significant property that is not present in the traditional technique: it makes the block cipher a self-synchronizing stream cipher. A cipher is called self-synchronizing when, if a part of the ciphertext is lost, the decryption can continue correctly after a finite number of incorrect decryptions of blocks.
 In the standard CFB if a bit of the ciphertext is lost the technique is not able to synchronize.
 With the shift registers, instead, if we lost $x$ bits of a ciphertext segment $C_j$, the decryption will produce wrong plaintext segments until that there are some bits of $C_j$ in $SR$. The number of the corrupted plaintext segments is $n/s$.
 
